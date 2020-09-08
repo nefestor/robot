@@ -6,26 +6,36 @@ Test Teardown   Encerra sessão
 
 *** Test Cases ***
 Login com sucesso
-    Go To                   ${url}/login
-    Input Text              css:input[name=username]    stark
-    Input Text              css:input[name=password]    jarvis!
-    Click Element           class:btn-login
-    Page Should Contain     Olá, Tony Stark. Você acessou a área logada!
+    Go To                           ${url}/login
+    Login With                      stark   jarvis!
+    Should Contain Login Alert      Tony Stark
 
 Login com senha inválida
-    [tags]  login_error
-    Go To                   ${url}/login
-    Input Text              css:input[name=username]    stark
-    Input Text              css:input[name=password]    abc123
-    Click Element           class:btn-login
-    ${message}=             Get WebElement              id:flash
-    Should Contain          ${message.text}             Senha é invalida!
+    Go To                       ${url}/login
+    Login With                  stark   123!
+    ${message}=                 Get WebElement              id:flash
+    Should Contain Login Alert  Senha é invalida!
 
 Login com usuario inválido
-    [tags]  login_user404
-    Go To                   ${url}/login
-    Input Text              css:input[name=username]    papito
-    Input Text              css:input[name=password]    123456
+    Go To                                   ${url}/login
+    Login With                              teste   jarvis!
+    ${message}=                             Get WebElement              id:flash
+    Should Contain Login Alert              O usuário informado não está cadastrado!
+
+*** Keywords ***
+Login With
+    [Arguments]             ${uname}    ${pass}
+    Input Text              css:input[name=username]    ${uname}
+    Input Text              css:input[name=password]    ${pass}
     Click Element           class:btn-login
-    ${message}=             Get WebElement              id:flash
-    Should Contain          ${message.text}             O usuário informado não está cadastrado!
+
+Should Contain Login Alert
+    [Arguments]             ${expect_message}
+
+    ${message}=             Get WebElement      id:flash
+    Should Contain          ${message.text}     ${expect_message}
+
+Should See Logged User
+    [Arguments]             ${full_name}
+
+    Page Should Contain     Olá, ${full_name}. Você acessou a área logada!
